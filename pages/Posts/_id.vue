@@ -29,8 +29,8 @@
           </div>
         </div>
         <div class="inline-block">
-          <div class="block ml-1 float-right">
-            <button
+          <div class="inline ml-1 mt-2 float-right">
+            <Nuxt-Link
               class="
                 w-20
                 bg-transparent
@@ -44,11 +44,12 @@
                 hover:border-transparent
                 rounded
               "
+              :to="'/posts/update/' + post.id"
             >
               Update
-            </button>
+            </Nuxt-Link>
           </div>
-          <div class="block float-right">
+          <div class="inline float-right">
             <button
               class="
                 w-20
