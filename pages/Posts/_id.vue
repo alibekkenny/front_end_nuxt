@@ -28,46 +28,47 @@
             <p class="text-gray-600">{{ user.salary }}</p>
           </div>
         </div>
-        <div class="inline-block">
-          <div class="inline ml-1 mt-2 float-right">
-            <Nuxt-Link
-              class="
-                w-20
-                bg-transparent
-                hover:bg-green-500
-                text-green-700
-                font-semibold
-                hover:text-white
-                py-2
-                px-4
-                border border-green-500
-                hover:border-transparent
-                rounded
-              "
-              :to="'/posts/update/' + post.id"
-            >
+        <div class="block">
+          <div
+            class="
+              inline
+              ml-1
+              float-right
+              w-20
+              bg-transparent
+              hover:bg-green-500
+              text-green-700
+              font-semibold
+              hover:text-white
+              py-2
+              px-4
+              border border-green-500
+              hover:border-transparent
+              rounded
+            "
+          >
+            <Nuxt-Link class="" :to="'/posts/update/' + post.id">
               Update
             </Nuxt-Link>
           </div>
-          <div class="inline float-right">
-            <button
-              class="
-                w-20
-                bg-transparent
-                hover:bg-red-500
-                text-red-700
-                font-semibold
-                hover:text-white
-                py-2
-                px-4
-                border border-red-500
-                hover:border-transparent
-                rounded
-              "
-              @click="deletePost(index)"
-            >
-              Delete
-            </button>
+          <div
+            class="
+              inline
+              float-right
+              w-20
+              bg-transparent
+              hover:bg-red-500
+              text-red-700
+              font-semibold
+              hover:text-white
+              py-2
+              px-4
+              border border-red-500
+              hover:border-transparent
+              rounded
+            "
+          >
+            <button class="" @click="deletePost(index)">Delete</button>
           </div>
         </div>
       </div>
@@ -88,6 +89,7 @@
         border border-blue-500
         hover:border-transparent
         rounded-full
+        mr-2
       "
       >Add post</Nuxt-Link
     >

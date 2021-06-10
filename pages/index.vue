@@ -15,6 +15,7 @@
           border border-blue-500
           hover:border-transparent
           rounded-full
+          mr-1
         "
       >
         +
@@ -44,8 +45,7 @@
         <td class="px-4 py-3">{{ user.companies_id }}</td>
         <td class="px-4 py-3">
           <div class="block">
-            <button
-              @click="deleteUser(index)"
+            <div
               class="
                 inline
                 px-4
@@ -56,10 +56,9 @@
                 rounded
               "
             >
-              Delete
-            </button>
-            <Nuxt-Link
-              :to="'/users/update/' + user.id"
+              <button @click="deleteUser(index)" class="">Delete</button>
+            </div>
+            <div
               class="
                 inline
                 px-4
@@ -70,8 +69,10 @@
                 rounded
               "
             >
-              Update</Nuxt-Link
-            >
+              <Nuxt-Link :to="'/users/update/' + user.id" class="">
+                Update</Nuxt-Link
+              >
+            </div>
           </div>
         </td>
         <td class="px-4 py-3">
