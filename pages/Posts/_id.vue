@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <div v-for="(post, index) in posts" :key="post.id" class="w-full">
+    <div v-for="post in user.posts" :key="post.id" class="w-full">
       <div
         class="
           border-r border-l border-b border-t border-gray-400
@@ -20,7 +20,7 @@
         <div class="flex items-center">
           <img
             class="w-10 h-10 rounded-full mr-4"
-            :src="user.image_path"
+            :src="user.avatar"
             alt="Avatar of Writer"
           />
           <div class="text-sm">
@@ -68,7 +68,7 @@
               rounded
             "
           >
-            <button class="" @click="deletePost(index)">Delete</button>
+            <button class="" @click="deletePost(post.id)">Delete</button>
           </div>
         </div>
       </div>
@@ -96,35 +96,57 @@
   </div>
 </template>
 <script>
-import axios from "axios";
+import gql from "graphql-tag";
+
 export default {
   name: "Posts",
   data() {
     return {
-      posts: [],
-      user: Object,
+      user: "",
     };
   },
-  async mounted() {
-    const id = this.$route.params.id;
-    const { data, status } = await axios.get(
-      "http://127.0.0.1:8080/api/users/" + id + "/posts"
-    );
-    const user = (await axios.get("http://127.0.0.1:8080/api/users/" + id))
-      .data;
-    console.log(status);
-    console.log(user);
-    this.posts = data;
-    this.user = user;
+  apollo: {
+    user: {
+      query: gql`
+        query ($id: Int!) {
+          user(id: $id) {
+            id
+            first_name
+            avatar
+            posts {
+              id
+              title
+              content
+            }
+          }
+        }
+      `,
+      variables() {
+        return {
+          id: Number(this.$route.params.id),
+        };
+      },
+    },
   },
+
   methods: {
-    deletePost(i) {
-      const { data, status } = axios.delete(
-        "http://127.0.0.1:8080/api/posts/" + this.posts[i].id
-      );
-      console.log(status);
-      console.log(data);
-      this.posts.splice(i, 1);
+    deletePost(postId) {
+      this.$apollo.mutate({
+        // Query
+        mutation: gql`
+          mutation ($id: Int!) {
+            deletePost(id: $id) {
+              id
+              title
+              content
+            }
+          }
+        `,
+        // Parameters
+        variables: {
+          id: postId,
+        },
+      });
     },
   },
 };

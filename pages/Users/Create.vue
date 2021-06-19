@@ -79,46 +79,6 @@
                 md:mb-0
                 pr-4
               "
-              for="salary"
-            >
-              Salary
-            </label>
-          </div>
-          <div class="md:w-2/3">
-            <input
-              class="
-                bg-gray-200
-                appearance-none
-                border-2 border-gray-200
-                rounded
-                w-full
-                py-2
-                px-4
-                text-gray-700
-                leading-tight
-                focus:outline-none
-                focus:bg-white
-                focus:border-purple-500
-              "
-              id="salary"
-              v-model="salary"
-              type="text"
-              placeholder="1000"
-            />
-          </div>
-        </div>
-        <div class="md:flex md:items-center mb-6">
-          <div class="md:w-1/3">
-            <label
-              class="
-                block
-                text-gray-500
-                font-bold
-                md:text-right
-                mb-1
-                md:mb-0
-                pr-4
-              "
               for="image_path"
             >
               Image path
@@ -145,79 +105,6 @@
               type="text"
               placeholder="https://nerdist.com/wp-content/uploads/2020/07/maxresdefault.jpg"
             />
-          </div>
-        </div>
-        <div class="md:flex md:items-center mb-6">
-          <div class="md:w-1/3">
-            <label
-              class="
-                block
-                text-gray-500
-                font-bold
-                md:text-right
-                mb-1
-                md:mb-0
-                pr-4
-              "
-              for="companies"
-            >
-              Company
-            </label>
-          </div>
-          <div class="md:w-2/3">
-            <div class="relative">
-              <select
-                @change="selectCompanyId()"
-                v-model="selected"
-                class="
-                  block
-                  appearance-none
-                  w-full
-                  bg-gray-200
-                  border border-gray-200
-                  text-gray-700
-                  py-3
-                  px-4
-                  pr-8
-                  rounded
-                  leading-tight
-                  focus:outline-none
-                  focus:bg-white
-                  focus:border-gray-500
-                "
-                id="companies"
-              >
-                <option
-                  v-for="company in companies"
-                  :key="company.id"
-                  v-bind:value="{ id: company.id }"
-                >
-                  {{ company.company_name }}
-                </option>
-              </select>
-              <div
-                class="
-                  pointer-events-none
-                  absolute
-                  inset-y-0
-                  right-0
-                  flex
-                  items-center
-                  px-2
-                  text-gray-700
-                "
-              >
-                <svg
-                  class="fill-current h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                  />
-                </svg>
-              </div>
-            </div>
           </div>
         </div>
         <div class="md:flex md:items-center">
@@ -248,42 +135,35 @@
 </template>
 
 <script>
-import axios from "axios";
-
-const app = axios.create({ baseURL: "http://localhost:8080/api/" });
+import gql from "graphql-tag";
 
 export default {
   data() {
     return {
       errors: [],
-      selected: "",
-      companies: [],
       first_name: null,
-      salary: null,
       image_path: null,
-      companies_id: null,
     };
   },
-  async mounted() {
-    const { data, status } = await app.get("companies");
-    console.log(status);
-    this.companies = data;
-  },
   methods: {
-    deleteUser(i) {
-      const { data, status } = app.delete("users/" + this.users[i].id);
-      console.log(status);
-      console.log(data);
-      this.users.splice(i, 1);
-    },
     createUser() {
-      const newUser = {
-        first_name: this.first_name,
-        salary: this.salary,
-        image_path: this.image_path,
-        companies_id: this.companies_id,
-      };
-      app.post("users/", newUser);
+      this.$apollo.mutate({
+        // Query
+        mutation: gql`
+          mutation ($first_name: String!, $avatar: String!) {
+            createUser(first_name: $first_name, avatar: $avatar) {
+              id
+              first_name
+              avatar
+            }
+          }
+        `,
+        // Parameters
+        variables: {
+          first_name: this.first_name,
+          avatar: this.image_path,
+        },
+      });
       this.$router.push("/");
     },
     checkUser() {
@@ -291,22 +171,12 @@ export default {
       if (this.first_name == null) {
         this.errors.push("Wrong first name!");
       }
-      if (this.salary == null) {
-        this.errors.push("Wrong salary!");
-      }
       if (this.image_path == null) {
         this.errors.push("Wrong image path!");
-      }
-      if (this.companies_id == null) {
-        this.errors.push("Wrong company id!");
       }
       if (this.errors.length == 0) {
         this.createUser();
       }
-    },
-
-    selectCompanyId() {
-      this.companies_id = Number(this.selected.id);
     },
   },
 };

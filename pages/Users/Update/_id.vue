@@ -5,7 +5,7 @@
         <label
           class="block text-indigo-500 text-4xl font-bold text-center mb-6"
         >
-          Create user
+          Update user
         </label>
         <div
           v-if="errors.length"
@@ -78,46 +78,7 @@
                 md:mb-0
                 pr-4
               "
-              for="salary"
-            >
-              Salary
-            </label>
-          </div>
-          <div class="md:w-2/3">
-            <input
-              class="
-                bg-gray-200
-                appearance-none
-                border-2 border-gray-200
-                rounded
-                w-full
-                py-2
-                px-4
-                text-gray-700
-                leading-tight
-                focus:outline-none
-                focus:bg-white
-                focus:border-purple-500
-              "
-              id="salary"
-              v-model="user.salary"
-              type="text"
-            />
-          </div>
-        </div>
-        <div class="md:flex md:items-center mb-6">
-          <div class="md:w-1/3">
-            <label
-              class="
-                block
-                text-gray-500
-                font-bold
-                md:text-right
-                mb-1
-                md:mb-0
-                pr-4
-              "
-              for="image_path"
+              for="avatar"
             >
               Image path
             </label>
@@ -138,84 +99,10 @@
                 focus:bg-white
                 focus:border-purple-500
               "
-              id="image_path"
-              v-model="user.image_path"
+              id="avatar"
+              v-model="user.avatar"
               type="text"
-              placeholder="https://nerdist.com/wp-content/uploads/2020/07/maxresdefault.jpg"
             />
-          </div>
-        </div>
-        <div class="md:flex md:items-center mb-6">
-          <div class="md:w-1/3">
-            <label
-              class="
-                block
-                text-gray-500
-                font-bold
-                md:text-right
-                mb-1
-                md:mb-0
-                pr-4
-              "
-              for="companies"
-            >
-              Company
-            </label>
-          </div>
-          <div class="md:w-2/3">
-            <div class="relative">
-              <select
-                @change="selectCompanyId()"
-                v-model="selected"
-                class="
-                  block
-                  appearance-none
-                  w-full
-                  bg-gray-200
-                  border border-gray-200
-                  text-gray-700
-                  py-3
-                  px-4
-                  pr-8
-                  rounded
-                  leading-tight
-                  focus:outline-none
-                  focus:bg-white
-                  focus:border-gray-500
-                "
-                id="companies"
-              >
-                <option
-                  v-for="company in companies"
-                  :key="company.id"
-                  v-bind:value="{ id: company.id }"
-                >
-                  {{ company.company_name }}
-                </option>
-              </select>
-              <div
-                class="
-                  pointer-events-none
-                  absolute
-                  inset-y-0
-                  right-0
-                  flex
-                  items-center
-                  px-2
-                  text-gray-700
-                "
-              >
-                <svg
-                  class="fill-current h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                  />
-                </svg>
-              </div>
-            </div>
           </div>
         </div>
         <div class="md:flex md:items-center">
@@ -246,24 +133,32 @@
 </template>
 
 <script>
-import axios from "axios";
-
-const app = axios.create({ baseURL: "http://localhost:8080/api/" });
+import gql from "graphql-tag";
 
 export default {
   data() {
     return {
-      user: {},
+      user: "",
       errors: [],
-      selected: {},
     };
   },
-  async mounted() {
-    const id = this.$route.params.id;
-    this.companies = (await app.get("companies")).data;
-    const { data, status } = await app.get("users/" + id);
-    this.user = data;
-    this.selected.id = this.user.companies_id;
+  apollo: {
+    user: {
+      query: gql`
+        query ($id: Int!) {
+          user(id: $id) {
+            id
+            first_name
+            avatar
+          }
+        }
+      `,
+      variables() {
+        return {
+          id: Number(this.$route.params.id),
+        };
+      },
+    },
   },
   methods: {
     checkUser() {
@@ -271,29 +166,30 @@ export default {
       if (this.user.first_name == null) {
         this.errors.push("Wrong first name!");
       }
-      if (this.user.salary == null) {
-        this.errors.push("Wrong salary!");
-      }
-      if (this.user.image_path == null) {
+      if (this.user.avatar == null) {
         this.errors.push("Wrong image path!");
-      }
-      if (this.user.companies_id == null) {
-        this.errors.push("Wrong company id!");
       }
       if (this.errors.length == 0) {
         this.updateUser();
       }
     },
     updateUser() {
-      const updatedUser = {
-        first_name: this.user.first_name,
-        salary: this.user.salary,
-        image_path: this.user.image_path,
-        companies_id: this.user.companies_id,
-      };
-      const { data, status } = app.put("users/" + this.user.id, updatedUser);
-      console.log(status);
-      console.log(data);
+      this.$apollo.mutate({
+        mutation: gql`
+          mutation ($id: Int!, $first_name: String!, $avatar: String!) {
+            updateUser(id: $id, first_name: $first_name, avatar: $avatar) {
+              id
+              first_name
+              avatar
+            }
+          }
+        `,
+        variables: {
+          id: this.user.id,
+          first_name: this.user.first_name,
+          avatar: this.user.avatar,
+        },
+      });
       this.$router.push("/");
     },
     selectCompanyId() {

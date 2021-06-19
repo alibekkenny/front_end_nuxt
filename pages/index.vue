@@ -26,23 +26,19 @@
         <th class="px-4 py-3">Image</th>
         <th class="px-4 py-3">ID</th>
         <th class="px-4 py-3">Firstname</th>
-        <th class="px-4 py-3">Salary</th>
-        <th class="px-4 py-3">Companies_id</th>
         <th class="px-4 py-3">Actions</th>
       </tr>
 
       <tr
-        v-for="(user, index) in users"
+        v-for="user in users"
         :key="user.id"
         class="bg-gray-100 border-b border-gray-200"
       >
         <td class="px-4 py-3">
-          <img class="rounded-full h-32 w-32" :src="user.image_path" alt="" />
+          <img class="rounded-full h-32 w-32" :src="user.avatar" alt="" />
         </td>
         <td class="px-4 py-3">{{ user.id }}</td>
         <td class="px-4 py-3">{{ user.first_name }}</td>
-        <td class="px-4 py-3">{{ user.salary }}</td>
-        <td class="px-4 py-3">{{ user.companies_id }}</td>
         <td class="px-4 py-3">
           <div class="block">
             <div
@@ -56,7 +52,7 @@
                 rounded
               "
             >
-              <button @click="deleteUser(index)" class="">Delete</button>
+              <button @click="deleteUser(user.id)">Delete</button>
             </div>
             <div
               class="
@@ -88,26 +84,48 @@
 </template>
 
 <script>
-import axios from "axios";
-const app = axios.create({ baseURL: "http://localhost:8080/api/" });
+import gql from "graphql-tag";
 
 export default {
-  data() {
-    return {
-      users: [],
-    };
-  },
-  async mounted() {
-    const { data, status } = await app.get("users");
-    console.log(status);
-    this.users = data;
+  // data() {
+  //   return {
+  //     users: [],
+  //   };
+  // },
+  // async mounted() {
+  //   const { data, status } = await app.get("users");
+  //   console.log(status);
+  //   this.users = data;
+  // },
+  apollo: {
+    users: gql`
+      {
+        users {
+          id
+          first_name
+          avatar
+        }
+      }
+    `,
   },
   methods: {
-    deleteUser(i) {
-      const { data, status } = app.delete("users/" + this.users[i].id);
-      console.log(status);
-      console.log(data);
-      this.users.splice(i, 1);
+    deleteUser(userId) {
+      this.$apollo.mutate({
+        // Query
+        mutation: gql`
+          mutation ($id: Int!) {
+            deleteUser(id: $id) {
+              id
+              first_name
+              avatar
+            }
+          }
+        `,
+        // Parameters
+        variables: {
+          id: userId,
+        },
+      });
     },
   },
 };

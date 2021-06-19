@@ -34,7 +34,15 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
+    '@nuxtjs/apollo',
   ],
+  apollo: {
+    clientConfigs: {
+      default: {
+        httpEndpoint: 'http://localhost:4000/graphql',
+      }
+    }
+  },
 
   // Content module configuration: https://go.nuxtjs.dev/config-content
   content: {},

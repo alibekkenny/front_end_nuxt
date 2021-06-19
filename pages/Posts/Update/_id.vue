@@ -114,20 +114,33 @@
 </template>
 
 <script>
-import axios from "axios";
-
-const app = axios.create({ baseURL: "http://localhost:8080/api/" });
+import gql from "graphql-tag";
 
 export default {
   data() {
     return {
-      post: {},
+      post: "",
       errors: [],
     };
   },
-  async mounted() {
-    const id = this.$route.params.id;
-    this.post = (await app.get("posts/" + id)).data;
+  apollo: {
+    post: {
+      query: gql`
+        query ($id: Int!) {
+          post(id: $id) {
+            id
+            title
+            content
+            authorId
+          }
+        }
+      `,
+      variables() {
+        return {
+          id: Number(this.$route.params.id),
+        };
+      },
+    },
   },
   methods: {
     checkPost() {
@@ -143,13 +156,23 @@ export default {
       }
     },
     updatePost() {
-      const newPost = {
-        title: this.post.title,
-        content: this.post.content,
-        users_id: this.post.users_id,
-      };
-      app.put("posts/" + this.post.id, newPost);
-      this.$router.push("/posts/" + this.post.users_id);
+      this.$apollo.mutate({
+        mutation: gql`
+          mutation ($id: Int!, $title: String!, $content: String!) {
+            updatePost(id: $id, title: $title, content: $content) {
+              id
+              title
+              content
+            }
+          }
+        `,
+        variables: {
+          id: this.post.id,
+          title: this.post.title,
+          content: this.post.content,
+        },
+      });
+      this.$router.push("/posts/" + this.post.authorId);
     },
   },
 };

@@ -116,16 +116,14 @@
 </template>
 
 <script>
-import axios from "axios";
-
-const app = axios.create({ baseURL: "http://localhost:8080/api/" });
+import gql from "graphql-tag";
 
 export default {
   data() {
     return {
       title: null,
       content: null,
-      user_id: "",
+      user_id: null,
       errors: [],
     };
   },
@@ -145,13 +143,26 @@ export default {
         this.createPost();
       }
     },
-    createPost() {
-      const newPost = {
-        title: this.title,
-        content: this.content,
-        users_id: this.user_id,
-      };
-      app.post("posts/", newPost);
+    async createPost() {
+      await this.$apollo.mutate({
+        // Query
+        mutation: gql`
+          mutation ($title: String!, $content: String!, $authorId: Int!) {
+            createPost(title: $title, content: $content, authorId: $authorId) {
+              id
+              title
+              content
+              authorId
+            }
+          }
+        `,
+        // Parameters
+        variables: {
+          title: this.title,
+          content: this.content,
+          authorId: this.user_id,
+        },
+      });
       this.$router.push("/posts/" + this.user_id);
     },
   },
