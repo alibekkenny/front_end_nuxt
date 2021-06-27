@@ -87,11 +87,11 @@
 import gql from "graphql-tag";
 
 export default {
-  // data() {
-  //   return {
-  //     users: [],
-  //   };
-  // },
+  data() {
+    return {
+      users: [],
+    };
+  },
   // async mounted() {
   //   const { data, status } = await app.get("users");
   //   console.log(status);

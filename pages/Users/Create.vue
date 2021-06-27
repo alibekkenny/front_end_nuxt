@@ -61,6 +61,8 @@
                 focus:border-purple-500
               "
               id="first_name"
+              name="first_name"
+              :rules="isRequired"
               v-model="first_name"
               type="text"
               placeholder="Example"
